@@ -215,10 +215,6 @@ const getDateString = () => {
 };
 
 const runScript = (tool, filePath, optionArr, outFol, event, config) => {
-  let shieldedPath = filePath.split('');
-  shieldedPath.unshift('"');
-  shieldedPath.push('"');
-  shieldedPath = shieldedPath.join('');
   let reportData = '';
   let reportText = '';
   let errorText = '';
@@ -233,12 +229,12 @@ const runScript = (tool, filePath, optionArr, outFol, event, config) => {
   }
 
   const scriptPath = isDevelopment
-    ? path.join(__dirname, '..', '..', 'libs', OSconfigTool.scriptPath)
-    : path.join(__dirname, '..', 'libs', OSconfigTool.scriptPath);
+    ? path.resolve(__dirname, '..', '..', 'libs', OSconfigTool.scriptPath)
+    : path.resolve(__dirname, '..', 'libs', OSconfigTool.scriptPath);
 
   const command = OSconfigTool.scriptType === 'shell' ? scriptPath : OSconfigTool.scriptType;
 
-  const optionObj = {};
+  const optionObj = { shell: true };
 
   if (OSconfigTool.workingDirectory) {
     optionObj.cwd = isDevelopment
@@ -246,10 +242,10 @@ const runScript = (tool, filePath, optionArr, outFol, event, config) => {
       : path.join(__dirname, '..', 'libs', OSconfigTool.workingDirectory);
   }
 
-  reportData = spawn(command, [
+  reportData = spawn(`"${command}"`, [
     ...OSconfigTool.scriptArguments,
     ...optionArr,
-    filePath,
+    `"${filePath}"`,
   ], optionObj);
 
   reportData.stdout.on('data', (data) => {
